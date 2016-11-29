@@ -1,8 +1,8 @@
-> **Warning**: this code is not pretty nor do I know if this is the proper way to do any of this. This was a project for me to learn Raspberry Pi, Lambda, and AWS IoT. 
+> **Warning**: this code is not pretty nor do I know if this is the proper way to do any of this. This was a project for me to learn Raspberry Pi, Lambda, and AWS IoT. I have no real plans to maintain this - it is more just a basic "how to" for implementing this since nothing out there exists to do it. 
 
 The goal is, can we hook Alexa up and have it run a Raspberry Pi? The answer is yes.
 
-We have two goals: Ask Alexa to open or close the garage door and query alexa if the garage door is open. The Alexa trigger word is `Garage Door` to get into the garage door functionality. 
+We have two goals: Ask Alexa to open or close the garage door and query Alexa if the garage door is open. The Alexa trigger word is `Garage Door` to get into the garage door functionality. 
 
 ### Asking to open or close
 
