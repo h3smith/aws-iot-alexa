@@ -55,6 +55,51 @@ Copy the `labmda/pi-garage-ask/code.js` code into this function. This code will 
 
 You will need to copy the ARN for the `pi-garage-open-lambda` into the code where we define the SNS topic at the top of the file. 
 
+Additionally you will need the ID for your AWS IoT device and set it in the `pi-garage-ask` Lambda function:
+
+```
+var iotdata = new aws.IotData({
+  endpoint: '{IOT_ID}.iot.us-east-1.amazonaws.com',
+  apiVersion: '2015-05-28'
+});
+```
+
+##### Permissions
+
+Create a new IAM role: `lambda_ask_garage` and assign it the policies:
+
+iot_permissioms:
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+        "Effect": "Allow",
+        "Action": ["iot:Connect","iot:GetThingShadow"],
+        "Resource": ["*"]
+        }
+  ]
+}
+```
+
+send_sns (add any SNS permissions you want it to hit)
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sns:Publish"
+            ],
+            "Resource": [
+                "arn:aws:sns:us-east-1:306302221454:pi-garage-open-lambda"
+            ]
+        }
+    ]
+}
+```
+
 ## Setup SNS Topics
 
 SNS helps drive the events we are creating. We will create one and optionally two. 
