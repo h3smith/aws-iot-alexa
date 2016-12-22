@@ -31,7 +31,13 @@ Browse to [AWS IoT](https://console.aws.amazon.com/iot/home?region=us-east-1#) a
 
 These certs and keys will be used on your Pi to connect to AWS IoT and establish the MQTT connection for bidirectional communication. 
 
+## Pi Code
 
+`iot.js` is our Pi IoT/nodejs code. This is what we load into our Pi to open and close the garage door on the actual device. This has the connections to and from the AWS IoT with MQTT.
+
+**Note: this code is not pretty and needs to be cleaned up**
+
+It is pretty self explanatory. 
 
 ## Setup Lambda function
 
