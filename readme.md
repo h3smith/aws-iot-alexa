@@ -99,7 +99,7 @@ send_sns (add any SNS permissions you want it to hit)
                 "sns:Publish"
             ],
             "Resource": [
-                "arn:aws:sns:us-east-1:306302221454:pi-garage-open-lambda"
+                "arn:aws:sns:us-east-1:{account-id}:pi-garage-open-lambda"
             ]
         }
     ]
