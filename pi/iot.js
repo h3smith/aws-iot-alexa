@@ -2,7 +2,7 @@
 var awsIot = require('aws-iot-device-sdk');
 
 // Web Server Imports
-var gpio = require("rpi-gpio");
+var gpio = require("./pi-gpio.js");
 var sleep = require('sleep');
 
 var pin_location = 11;
@@ -19,20 +19,20 @@ var _time_down = 16;
 var _closed_state = 1;
 var _open_state = 0;
 
-// Pin for opening a closing the door
-gpio.setup(door_pin, gpio.DIR_OUT, outputSetup);
+// Initalize output with HIGH status
+gpio.open(door_pin, "output pullup", function(err) { if (err) throw err; });
 
-// Setup our door check pin
-gpio.setup(pin_location, gpio.DIR_IN, gpio.EDGE_RISING);
+// Initalize input for reading the door state
+gpio.open(pin_location, "input", function(err) { if (err) throw err; });
 
-gpio.on('change', function (channel, value) {
-//    console.log('Channel ' + channel + ' value is now ' + value);
-});
 
-// Setup as high
-function outputSetup() {
-    gpio.write(door_pin, _closed_state);
-}
+
+
+
+
+
+
+
 
 var _changeStatusTopic = "toggle-garage-door-topic";
 var myThingName = 'pi-garage';
@@ -117,6 +117,14 @@ thingShadows.on('connect', function () {
         console.log("Update:" + clientTokenIP);
         thingShadows.subscribe(_changeStatusTopic, { qos: 0 }, function (err, granted) { });
     }, 2500);
+
+    // An update right away causes a timeout error, so we wait about 2 seconds
+/*
+    setTimeout(function () {
+        console.log("Updating door status");
+        postStatus();
+    }, 5000);
+*/
 
     // Code below just logs messages for info/debugging
     thingShadows.on('status',
@@ -230,7 +238,7 @@ function recursiveCall(the_interval, fn) {
 }
 
 
-// Force update every X seconds
+// Force update
 recursiveCall(_second_force_update * 1000, function() { 
 	// Make sure we are in the low state
 	gpio.write(door_pin, _closed_state);
@@ -239,3 +247,4 @@ recursiveCall(_second_force_update * 1000, function() {
 
 // here is where we do our 5 minute call
 recursiveCall(_minute_force_update * 60 * 1000, function() { _last_state = null; postStatus(); });
+

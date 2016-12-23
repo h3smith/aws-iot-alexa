@@ -35,6 +35,8 @@ These certs and keys will be used on your Pi to connect to AWS IoT and establish
 
 `iot.js` is our Pi IoT/nodejs code. This is what we load into our Pi to open and close the garage door on the actual device. This has the connections to and from the AWS IoT with MQTT.
 
+`iot.js` relies on a NPM project that isn't maintained anymore `pi-gpio.js` - we had to make some customizations to it. Mainly, the state would toggle the switch connected to the garage door and open it when `iot.js` started. This is bad, you don't want your garage opening when the PI rebooted!
+
 **Note: this code is not pretty and needs to be cleaned up**
 
 It is pretty self explanatory. 
