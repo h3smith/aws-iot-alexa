@@ -37,6 +37,34 @@ function buildResponse(sessionAttributes, speechletResponse) {
         sessionAttributes,
         response: speechletResponse,
     };
+
+function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
+    return {
+        outputSpeech: {
+            type: 'PlainText',
+            text: output,
+        },
+        card: {
+            type: 'Simple',
+            title: `SessionSpeechlet - ${title}`,
+            content: `SessionSpeechlet - ${output}`,
+        },
+        reprompt: {
+            outputSpeech: {
+                type: 'PlainText',
+                text: repromptText,
+            },
+        },
+        shouldEndSession,
+    };
+}
+
+function buildResponse(sessionAttributes, speechletResponse) {
+    return {
+        version: '1.0',
+        sessionAttributes,
+        response: speechletResponse,
+    };
 }
 
 
@@ -67,7 +95,7 @@ function handleSessionEndRequest(callback) {
 
 function createFavoriteColorAttributes(favoriteColor) {
     return {
-        favoriteColor,
+        favoriteColor
     };
 }
 
@@ -77,40 +105,164 @@ function createFavoriteColorAttributes(favoriteColor) {
 function changeDoorState(intent, session, callback, context) {
     const cardTitle = intent.name;
     const favoriteColorSlot = intent.slots.State;
+    const desiredState = favoriteColorSlot.value;
     let repromptText = '';
     let sessionAttributes = {};
     const shouldEndSession = false;
     let speechOutput = '';
 
-    if (favoriteColorSlot) {
-        const favoriteColor = favoriteColorSlot.value;
-        sessionAttributes = createFavoriteColorAttributes(favoriteColor);
-        speechOutput = "Now changing the garage door state";
-        repromptText = "You can open the garage door by saying open it. Ask, is it up to find out if the door is open or closed";
+console.log(favoriteColorSlot);
+console.log(desiredState);
+
+    if (desiredState === "close") {
+        
+        
         
             
+        iotdata.getThingShadow({ thingName: 'pi-garage' }, function(err, data) {
+          if (err) { 
+                console.log(err, err.stack); 
+                context.done(err);
+                return;
+          }
+          var payload = JSON.parse(data.payload);
+          var state = payload.state.reported["door-closed"];
+          
+            const favoriteColor = favoriteColorSlot.value;
+            sessionAttributes = createFavoriteColorAttributes(favoriteColor);
             
-        var sns = new aws.SNS();
-        var params = {
-            Message: 'Some message', 
-            Subject: "Does not matter",
-            TopicArn: sns_topic
-        };
-//        sns.publish(params);
+            
+            
+          if (state != "closed") {
+                  
+            speechOutput = "Now closing the garage door";
+            repromptText = "You can close the garage door by saying close it. Ask, is it up to find out if the door is open or closed";
+            
+                
+            // Toggle
+            var sns = new aws.SNS();
+            var params = {
+                Message: '<empty>', 
+                Subject: "Test SNS From Lambda",
+                TopicArn: sns_topic
+            };
+            
+            sns.publish(params, function(err, data) {
+                if (err) 
+                    console.log(err, err.stack); // an error occurred
+                else
+                    console.log(data);           // successful response
+
+
+                // Setting repromptText to null signifies that we do not want to reprompt the user.
+                // If the user does not respond or says something that is not understood, the session
+                // will end.
+                callback(sessionAttributes, buildSpeechletResponse(intent.name, speechOutput, null, true));
+                
+            });
+              
+          }
+          else {
+            speechOutput = "The door is already closed";
+            repromptText = "The door is already closed";
+
+            // Setting repromptText to null signifies that we do not want to reprompt the user.
+            // If the user does not respond or says something that is not understood, the session
+            // will end.
+            callback(sessionAttributes, buildSpeechletResponse(intent.name, speechOutput, null, true));
+            
+          }
+            
+            
+            
+            
+            
+            
+          
+               
+        });
         
-sns.publish(params, function(err, data) {
-  if (err) console.log(err, err.stack); // an error occurred
-  else     console.log(data);           // successful response
-});
+        
+        
 
         
-    } else {
-        speechOutput = "I'm not sure what you want me to do with the door";
-        repromptText = "I'm not sure what you want me to do with the door, please restate";
+    }     
+    else if (desiredState === "open") {
+        
+        
+        
+            
+        iotdata.getThingShadow({ thingName: 'pi-garage' }, function(err, data) {
+          if (err) { 
+                console.log(err, err.stack); 
+                context.done(err);
+                return;
+          }
+          var payload = JSON.parse(data.payload);
+          var state = payload.state.reported["door-closed"];
+          
+            const favoriteColor = favoriteColorSlot.value;
+            sessionAttributes = createFavoriteColorAttributes(favoriteColor);
+            
+            
+            
+          if (state != "open") {
+                  
+            speechOutput = "Now opening the garage door";
+            repromptText = "You can open the garage door by saying open it. Ask, is it up to find out if the door is open or closed";
+            
+                
+            // Toggle
+            var sns = new aws.SNS();
+            var params = {
+                Message: '<empty>', 
+                Subject: "Test SNS From Lambda",
+                TopicArn: sns_topic
+            };
+            
+            sns.publish(params, function(err, data) {
+                if (err) 
+                    console.log(err, err.stack); // an error occurred
+                else
+                    console.log(data);           // successful response
+
+                // Setting repromptText to null signifies that we do not want to reprompt the user.
+                // If the user does not respond or says something that is not understood, the session
+                // will end.
+                callback(sessionAttributes, buildSpeechletResponse(intent.name, speechOutput, null, true));
+                
+            });
+              
+          }
+          else {
+            speechOutput = "The door is already open";
+            repromptText = "The door is already open";
+
+            // Setting repromptText to null signifies that we do not want to reprompt the user.
+            // If the user does not respond or says something that is not understood, the session
+            // will end.
+            callback(sessionAttributes, buildSpeechletResponse(intent.name, speechOutput, null, true));
+            
+
+          }
+            
+            
+        });
+        
+        
+        
+
+        
+    } 
+    
+    else {
+        speechOutput = "Ask to open or close the garage door";
+        repromptText = "Ask to open or close the garage door, please restate";
+        
+        callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
 
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
 function getDoorState(intent, session, callback) {
@@ -123,10 +275,7 @@ function getDoorState(intent, session, callback) {
     
     
     
-    var params = {
-      thingName: 'pi-garage'
-    };
-    iotdata.getThingShadow(params, function(err, data) {
+    iotdata.getThingShadow({ thingName: 'pi-garage' }, function(err, data) {
       if (err) { 
             console.log(err, err.stack); 
             context.done(err);
@@ -147,12 +296,10 @@ function getDoorState(intent, session, callback) {
         // If the user does not respond or says something that is not understood, the session
         // will end.
         callback(sessionAttributes,
-             buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+             buildSpeechletResponse(intent.name, speechOutput, null, true));
              
     });
     
-    
-
 }
 
 
